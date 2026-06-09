@@ -1,98 +1,148 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Laboratorio tecnico - Pipeline CI/CD con GitHub Actions y Jenkins
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## 1. Descripcion de la aplicacion
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Esta aplicacion es un proyecto web/API desarrollado con [NestJS](https://nestjs.com/), un framework progresivo de Node.js para construir aplicaciones server-side eficientes y escalables.
 
-## Description
+El objetivo del repositorio es servir como base para un laboratorio tecnico de CI/CD, integrando automatizacion con GitHub Actions, Jenkins y Docker.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+La aplicacion expone un servicio HTTP basico y se ejecuta por defecto en el puerto `3000`.
 
-## Project setup
+## 2. Tecnologias utilizadas
+
+- GitHub
+- GitHub Actions
+- Jenkins
+- Docker
+- Node.js 24
+- pnpm
+- NestJS
+- TypeScript
+- Jest
+- Google Cloud Run
+- Google Artifact Registry
+
+## 3. Pipeline CI/CD con GitHub Actions
+
+El workflow de GitHub Actions se encuentra en `.github/workflows/deploy.yml`.
+
+Actualmente se ejecuta cuando hay un `push` a la rama `main`. Este pipeline esta orientado a despliegue continuo hacia Google Cloud Run.
+
+Stages principales:
+
+- Checkout del repositorio con `actions/checkout`.
+- Autenticacion con Google Cloud usando Workload Identity Federation.
+- Configuracion de `gcloud`.
+- Configuracion de Docker para publicar imagenes en Artifact Registry.
+- Build de la imagen Docker usando el `Dockerfile` del repositorio.
+- Publicacion de la imagen Docker en Google Artifact Registry.
+- Despliegue de la imagen en Google Cloud Run.
+
+Para que el workflow funcione correctamente, el repositorio debe tener configurados estos secretos:
+
+- `GCP_PROJECT_ID`
+- `WIF_PROVIDER`
+- `WIF_SERVICE_ACCOUNT`
+
+Nota: el enunciado del laboratorio contempla un pipeline CI en `push` y `pull_request` con instalacion de dependencias, pruebas y build. En este repositorio, el workflow actual esta enfocado en CD sobre `main`. Si se desea separar CI y CD, se puede agregar otro workflow para ejecutar `pnpm install`, `pnpm run test` y `pnpm run build` en cada push o pull request.
+
+## 4. Pipeline CD con Jenkins
+
+El repositorio incluye un archivo `Jenkinsfile` en la raiz. Actualmente el archivo existe, pero todavia no tiene stages definidos.
+
+Para este laboratorio, el `Jenkinsfile` deberia definir un pipeline con los siguientes stages:
+
+- Checkout del codigo fuente.
+- Instalacion de dependencias con `pnpm install --frozen-lockfile`.
+- Ejecucion de pruebas con `pnpm run test`.
+- Build de la aplicacion con `pnpm run build`.
+- Build de la imagen Docker.
+- Publicacion de la imagen en un registro de contenedores.
+- Stage de despliegue futuro.
+
+Este pipeline permitiria complementar GitHub Actions con una alternativa de automatizacion basada en Jenkins.
+
+## 5. Evidencias
+
+Agregar capturas o enlaces de evidencia del laboratorio:
+
+- Ejecucion correcta del workflow de GitHub Actions.
+- Archivo `Jenkinsfile` presente en el repositorio.
+- Si se ejecuta Jenkins, captura del pipeline o de la consola de ejecucion.
+- Imagen Docker publicada en el registro, si aplica.
+- Servicio desplegado en Cloud Run, si aplica.
+
+## 6. Como ejecutar localmente
+
+### Requisitos
+
+- Node.js `>=24`
+- pnpm `>=10`
+- Docker, si se desea construir o ejecutar la imagen localmente
+
+El repositorio define la version de Node.js en `.nvmrc` y `.node-version`, y el package manager en `package.json` mediante `packageManager`.
+
+### Instalar dependencias
 
 ```bash
-$ pnpm install
+corepack enable
+pnpm install
 ```
 
-## Compile and run the project
+### Ejecutar en desarrollo
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+pnpm run start
 ```
 
-## Run tests
+Modo watch:
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+pnpm run start:dev
 ```
 
-## Deployment
+### Ejecutar pruebas
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Pruebas unitarias:
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+pnpm run test
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Pruebas end-to-end:
 
-## Resources
+```bash
+pnpm run test:e2e
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+Cobertura:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+pnpm run test:cov
+```
 
-## Support
+### Compilar y ejecutar en modo produccion
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+pnpm run build
+pnpm run start:prod
+```
 
-## Stay in touch
+### Construir y ejecutar con Docker
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+docker build -t cicdtraining .
+docker run --rm -p 3000:3000 cicdtraining
+```
 
-## License
+La aplicacion quedara disponible en `http://localhost:3000`.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## 7. Conclusiones
+
+La integracion de CI/CD mejora la automatizacion del ciclo de desarrollo porque permite ejecutar validaciones, construir artefactos y desplegar aplicaciones de forma repetible.
+
+GitHub Actions facilita la integracion directa con el repositorio y, en este proyecto, automatiza la construccion, publicacion y despliegue de la imagen Docker en Google Cloud Run.
+
+Jenkins permite definir pipelines flexibles para instalacion de dependencias, pruebas, build, publicacion de imagenes y futuras etapas de despliegue.
+
+En conjunto, estas herramientas mejoran la calidad, reducen errores manuales y aumentan la trazabilidad de cada cambio entregado.
