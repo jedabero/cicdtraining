@@ -2,8 +2,14 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'jedabero/cicdtraining'
+        REGION = 'southamerica-east1'
+        SERVICE_NAME = 'cicdtraining'
+        REPOSITORY = 'cicdtrainingrepo'
+        IMAGE_NAME = 'cicdtraining'
         IMAGE_TAG = "${BUILD_NUMBER}"
+
+        // Jenkins credential of type "Secret text" with the GCP project id.
+        GCP_PROJECT_ID = credentials('gcp-project-id')
     }
 
     stages {
@@ -13,9 +19,11 @@ pipeline {
             }
         }
 
-        stage('Enable corepack') {
+        stage('Setup Node and pnpm') {
             steps {
+                sh 'node --version'
                 sh 'corepack enable'
+                sh 'pnpm --version'
             }
         }
 
@@ -45,22 +53,51 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
-                sh 'docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest'
+                sh '''
+                    IMAGE="${REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                    docker build -t "$IMAGE" .
+                    docker tag "$IMAGE" "${REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:latest"
+                '''
+            }
+        }
+
+        stage('Authenticate with Google Cloud') {
+            steps {
+                // Jenkins credential of type "Secret file" containing a service account JSON key.
+                // The service account must have Cloud Run Admin, Artifact Registry Writer,
+                // and Service Account User permissions.
+                withCredentials([file(credentialsId: 'gcp-service-account-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    sh 'gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"'
+                    sh 'gcloud config set project "$GCP_PROJECT_ID"'
+                    sh 'gcloud auth configure-docker $REGION-docker.pkg.dev --quiet'
+                }
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                echo 'Authenticate with DockerHub and push image'
-                sh 'docker push $IMAGE_NAME:$IMAGE_TAG'
-                sh 'docker push $IMAGE_NAME:latest'
+                sh '''
+                    gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+
+                    IMAGE="${REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:${IMAGE_TAG}"
+
+                    docker push "$IMAGE"
+                    docker push "${REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:latest"
+                '''
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy to Cloud Run') {
             steps {
-                echo 'Deployment stage defined for future Kubernetes or cloud environment'
+                sh '''
+                    IMAGE="${REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:${IMAGE_TAG}"
+
+                    gcloud run deploy "$SERVICE_NAME" \
+                      --image "$IMAGE" \
+                      --region "$REGION" \
+                      --platform managed \
+                      --allow-unauthenticated
+                '''
             }
         }
     }

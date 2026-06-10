@@ -1,14 +1,20 @@
-# Laboratorio tecnico - Pipeline CI/CD con GitHub Actions y Jenkins
+# Laboratorio técnico - Pipeline CI/CD con GitHub Actions y Jenkins
 
-## 1. Descripcion de la aplicacion
+## 1. Descripción de la aplicación
 
-Esta aplicacion es un proyecto web/API desarrollado con [NestJS](https://nestjs.com/), un framework progresivo de Node.js para construir aplicaciones server-side eficientes y escalables.
+Este repositorio contiene una aplicación web/API desarrollada con [NestJS](https://nestjs.com/), TypeScript, Node.js 24 y pnpm. La aplicación sirve como base para la Actividad 3 de Fundamentos de DevOps, enfocada en la construcción de pipelines CI/CD con GitHub Actions, Jenkins y Docker.
 
-El objetivo del repositorio es servir como base para un laboratorio tecnico de CI/CD, integrando automatizacion con GitHub Actions, Jenkins y Docker.
+La aplicación expone los siguientes endpoints:
 
-La aplicacion expone un servicio HTTP basico y se ejecuta por defecto en el puerto `3000`.
+- `/`: endpoint principal que responde `Hello World!`.
+- `/health`: endpoint de salud que responde `{ "status": "ok" }`.
 
-## 2. Tecnologias utilizadas
+La aplicación desplegada en Google Cloud Run está disponible en:
+
+- `https://cicdtraining-523244991698.southamerica-east1.run.app`
+- `https://cicdtraining-523244991698.southamerica-east1.run.app/health`
+
+## 2. Tecnologías utilizadas
 
 - GitHub
 - GitHub Actions
@@ -21,128 +27,148 @@ La aplicacion expone un servicio HTTP basico y se ejecuta por defecto en el puer
 - Jest
 - Google Cloud Run
 - Google Artifact Registry
+- Workload Identity Federation
 
-## 3. Pipeline CI/CD con GitHub Actions
+## 3. Pipeline CI con GitHub Actions
 
-El workflow de GitHub Actions se encuentra en `.github/workflows/deploy.yml`.
+El pipeline de integración continua está definido en `.github/workflows/ci.yml`.
 
-Actualmente se ejecuta cuando hay un `push` a la rama `main`. Este pipeline esta orientado a despliegue continuo hacia Google Cloud Run.
+Este workflow se ejecuta automáticamente ante eventos `push` y `pull_request` sobre la rama `main`.
 
-Stages principales:
+El pipeline incluye los siguientes pasos:
 
-- Checkout del repositorio con `actions/checkout`.
-- Autenticacion con Google Cloud usando Workload Identity Federation.
-- Configuracion de `gcloud`.
-- Configuracion de Docker para publicar imagenes en Artifact Registry.
+- Checkout del código con `actions/checkout`.
+- Configuración de Node.js 24 con `actions/setup-node`.
+- Activación de Corepack para usar pnpm.
+- Instalación de dependencias con `pnpm install --frozen-lockfile`.
+- Ejecución de pruebas unitarias con `pnpm test`.
+- Ejecución de pruebas end-to-end con `pnpm test:e2e`.
+- Compilación de la aplicación con `pnpm build`.
+
+Este pipeline valida de forma temprana que el código compile correctamente y que las pruebas existentes pasen antes de integrar cambios en la rama principal.
+
+## 4. Pipeline CD con GitHub Actions hacia Cloud Run
+
+El pipeline de despliegue continuo está definido en `.github/workflows/cd.yml`.
+
+Este workflow se ejecuta automáticamente ante cada `push` sobre la rama `main` y representa el CD funcional usado en la práctica.
+
+El pipeline incluye los siguientes pasos:
+
+- Checkout del código con `actions/checkout`.
+- Autenticación con Google Cloud mediante Workload Identity Federation.
+- Configuración de `gcloud`.
+- Configuración de Docker para Google Artifact Registry.
 - Build de la imagen Docker usando el `Dockerfile` del repositorio.
-- Publicacion de la imagen Docker en Google Artifact Registry.
-- Despliegue de la imagen en Google Cloud Run.
+- Push de la imagen a Google Artifact Registry.
+- Deploy de la imagen en Google Cloud Run.
 
-Para que el workflow funcione correctamente, el repositorio debe tener configurados estos secretos:
+Configuración actual del despliegue:
 
-- `GCP_PROJECT_ID`
-- `WIF_PROVIDER`
-- `WIF_SERVICE_ACCOUNT`
+- Región: `southamerica-east1`
+- Servicio Cloud Run: `cicdtraining`
+- Imagen: `southamerica-east1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cicdtrainingrepo/cicdtraining`
 
-Nota: el enunciado del laboratorio contempla un pipeline CI en `push` y `pull_request` con instalacion de dependencias, pruebas y build. En este repositorio, el workflow actual esta enfocado en CD sobre `main`. Si se desea separar CI y CD, se puede agregar otro workflow para ejecutar `pnpm install`, `pnpm run test` y `pnpm run build` en cada push o pull request.
+El workflow usa los secretos configurados en GitHub para el proyecto GCP y Workload Identity Federation. No se almacenan credenciales sensibles en el repositorio.
 
-## 4. Pipeline CD con Jenkins
+## 5. Pipeline CD con Jenkins
 
-El repositorio incluye un archivo `Jenkinsfile` en la raiz. Actualmente el archivo existe, pero todavia no tiene stages definidos.
+El pipeline de Jenkins está definido en el archivo `Jenkinsfile` ubicado en la raíz del repositorio.
 
-Para este laboratorio, el `Jenkinsfile` deberia definir un pipeline con los siguientes stages:
+Según la guía de la actividad, no es indispensable que Jenkins esté funcionando. Lo requerido para el entregable es contar con la definición de stages del pipeline.
 
-- Checkout del codigo fuente.
-- Instalacion de dependencias con `pnpm install --frozen-lockfile`.
-- Ejecucion de pruebas con `pnpm run test`.
-- Build de la aplicacion con `pnpm run build`.
-- Build de la imagen Docker.
-- Publicacion de la imagen en un registro de contenedores.
+El `Jenkinsfile` contiene stages para:
+
+- Checkout del repositorio.
+- Verificación de Node.js y habilitación de Corepack.
+- Instalación de dependencias con `pnpm install --frozen-lockfile`.
+- Ejecución de pruebas unitarias con `pnpm test`.
+- Ejecución de pruebas end-to-end con `pnpm test:e2e`.
+- Build de la aplicación con `pnpm build`.
+- Build de imagen Docker.
+- Autenticación con Google Cloud.
+- Publicación de imagen en Google Artifact Registry.
 - Stage de despliegue futuro.
 
-Este pipeline permitiria complementar GitHub Actions con una alternativa de automatizacion basada en Jenkins.
+El `Jenkinsfile` sigue la misma estrategia general del workflow CD de GitHub Actions: construir una imagen Docker y publicarla en Google Artifact Registry usando la región `southamerica-east1`, el repositorio `cicdtrainingrepo` y la imagen `cicdtraining`.
 
-## 5. Evidencias
+Para ejecutar Jenkins de forma real, se deben configurar estas credenciales en Jenkins:
 
-Agregar capturas o enlaces de evidencia del laboratorio:
+- `gcp-project-id`: credencial tipo texto con el ID del proyecto GCP.
+- `gcp-service-account-key`: credencial tipo archivo con una llave JSON de una cuenta de servicio autorizada para Artifact Registry y Cloud Run.
 
-- Ejecucion correcta del workflow de GitHub Actions.
-- Archivo `Jenkinsfile` presente en el repositorio.
-- Si se ejecuta Jenkins, captura del pipeline o de la consola de ejecucion.
-- Imagen Docker publicada en el registro, si aplica.
-- Servicio desplegado en Cloud Run, si aplica.
+El stage final queda como despliegue futuro para cumplir el alcance de la guía sin exigir una instancia Jenkins funcional.
 
-## 6. Como ejecutar localmente
+## 6. Archivos principales del entregable
 
-### Requisitos
+- Código fuente NestJS en `src/`.
+- `.github/workflows/ci.yml`
+- `.github/workflows/cd.yml`
+- `Dockerfile`
+- `Jenkinsfile`
+- `README.md`
+- `package.json`
+- `pnpm-lock.yaml`
+- Pruebas unitarias y e2e en `src/*.spec.ts` y `test/`.
+
+## 7. Evidencias
+
+No se incluyen capturas falsas en este repositorio. Las evidencias deben agregarse manualmente después de ejecutar los pipelines y validar el despliegue.
+
+Capturas o enlaces requeridos:
+
+- Repositorio en GitHub.
+- Workflow CI ejecutado correctamente.
+- Workflow CD ejecutado correctamente.
+- Imagen publicada en Google Artifact Registry.
+- Servicio desplegado en Google Cloud Run.
+- Endpoint `/health` funcionando en Cloud Run.
+- `Jenkinsfile` con stages definidos.
+- Jenkins ejecutado, solo si se decide probarlo.
+
+También existe una guía de evidencias en `docs/evidencias/README.md`.
+
+## 8. Ejecución local
+
+Requisitos:
 
 - Node.js `>=24`
 - pnpm `>=10`
 - Docker, si se desea construir o ejecutar la imagen localmente
 
-El repositorio define la version de Node.js en `.nvmrc` y `.node-version`, y el package manager en `package.json` mediante `packageManager`.
-
-### Instalar dependencias
+Comandos principales:
 
 ```bash
 corepack enable
 pnpm install
+pnpm test
+pnpm test:e2e
+pnpm build
+pnpm start
 ```
 
-### Ejecutar en desarrollo
+Ejecución en modo desarrollo con recarga automática:
 
 ```bash
-pnpm run start
+pnpm start:dev
 ```
 
-Modo watch:
-
-```bash
-pnpm run start:dev
-```
-
-### Ejecutar pruebas
-
-Pruebas unitarias:
-
-```bash
-pnpm run test
-```
-
-Pruebas end-to-end:
-
-```bash
-pnpm run test:e2e
-```
-
-Cobertura:
-
-```bash
-pnpm run test:cov
-```
-
-### Compilar y ejecutar en modo produccion
-
-```bash
-pnpm run build
-pnpm run start:prod
-```
-
-### Construir y ejecutar con Docker
+Ejecución con Docker:
 
 ```bash
 docker build -t cicdtraining .
 docker run --rm -p 3000:3000 cicdtraining
 ```
 
-La aplicacion quedara disponible en `http://localhost:3000`.
+La aplicación local quedará disponible en:
 
-## 7. Conclusiones
+- `http://localhost:3000`
+- `http://localhost:3000/health`
 
-La integracion de CI/CD mejora la automatizacion del ciclo de desarrollo porque permite ejecutar validaciones, construir artefactos y desplegar aplicaciones de forma repetible.
+## 9. Conclusiones
 
-GitHub Actions facilita la integracion directa con el repositorio y, en este proyecto, automatiza la construccion, publicacion y despliegue de la imagen Docker en Google Cloud Run.
+La implementación de CI/CD mejora la automatización del ciclo de desarrollo porque permite validar el código, ejecutar pruebas, construir artefactos y desplegar de forma repetible.
 
-Jenkins permite definir pipelines flexibles para instalacion de dependencias, pruebas, build, publicacion de imagenes y futuras etapas de despliegue.
+El pipeline CI con GitHub Actions permite detectar errores de manera temprana antes de integrar cambios en `main`. El pipeline CD con GitHub Actions automatiza la publicación de imágenes Docker y el despliegue en Google Cloud Run, aumentando la trazabilidad de cada versión entregada.
 
-En conjunto, estas herramientas mejoran la calidad, reducen errores manuales y aumentan la trazabilidad de cada cambio entregado.
+El `Jenkinsfile` complementa el entregable al documentar una alternativa de pipeline CD con stages claros para dependencias, pruebas, build, Docker build, publicación de imagen y despliegue futuro. En conjunto, estas prácticas reducen errores manuales y fortalecen la calidad del proceso de entrega.
