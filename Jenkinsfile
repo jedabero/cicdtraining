@@ -13,15 +13,33 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Enable corepack') {
             steps {
-                sh 'npm ci'
+                sh 'corepack enable'
             }
         }
 
-        stage('Run Tests') {
+        stage('Install Dependencies') {
             steps {
-                sh 'npm test'
+                sh 'pnpm install --frozen-lockfile'
+            }
+        }
+
+        stage('Run Unit Tests') {
+            steps {
+                sh 'pnpm test'
+            }
+        }
+
+        stage('Run E2E Tests') {
+            steps {
+                sh 'pnpm test:e2e'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'pnpm build'
             }
         }
 

@@ -6,9 +6,9 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  REGION: us-central1
-  SERVICE_NAME: mi-app
-  IMAGE: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/mi-app/mi-app
+  REGION: southamerica-east1
+  SERVICE_NAME: cicdtraining
+  IMAGE: southamerica-east1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cicdtrainingrepo/cicdtraining
 
 jobs:
   deploy:
@@ -30,7 +30,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v3
 
       - name: Configurar Docker para Artifact Registry
-        run: gcloud auth configure-docker us-central1-docker.pkg.dev
+        run: gcloud auth configure-docker southamerica-east1-docker.pkg.dev
 
       - name: Build y push imagen Docker
         run: |
