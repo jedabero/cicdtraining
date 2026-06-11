@@ -16,7 +16,6 @@ Repositorio asociado:
 - Endpoint principal funcionando: `https://cicdtraining-523244991698.southamerica-east1.run.app`.
 - Endpoint de salud funcionando: `https://cicdtraining-523244991698.southamerica-east1.run.app/health`.
 - Archivo `Jenkinsfile` con stages definidos.
-- Pipeline de Jenkins ejecutado, solo si se decide probar Jenkins.
 
 ## Evidencias incluidas
 
