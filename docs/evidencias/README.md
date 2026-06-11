@@ -2,8 +2,6 @@
 
 Esta carpeta está destinada a organizar las capturas de pantalla o enlaces de evidencia de la Actividad 3.
 
-No se deben agregar capturas inventadas. Las evidencias deben generarse manualmente después de ejecutar los pipelines y validar el despliegue.
-
 Repositorio asociado:
 
 - `https://github.com/jedabero/cicdtraining`
