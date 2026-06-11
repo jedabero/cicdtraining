@@ -6,7 +6,7 @@ Repositorio asociado:
 
 - `https://github.com/jedabero/cicdtraining`
 
-## Capturas requeridas
+## Capturas
 
 - Repositorio `jedabero/cicdtraining` en GitHub.
 - Workflow CI en GitHub Actions ejecutado correctamente.
