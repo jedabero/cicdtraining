@@ -71,3 +71,5 @@ La captura muestra el archivo `Jenkinsfile` en GitHub. Se evidencian los stages 
 ![Jenkinsfile definido](08-jenkinsfile.png)
 
 Nota: no se incluye captura de una ejecución real en Jenkins. Para esta actividad, la guía indica que no es indispensable que Jenkins esté funcionando completamente; el criterio principal se cubre con la correcta definición del `Jenkinsfile`.
+
+En conjunto, las evidencias incluidas cubren el repositorio, CI con GitHub Actions, CD con GitHub Actions, publicación de imagen, despliegue en Cloud Run, validación del endpoint `/health` y definición del `Jenkinsfile`.

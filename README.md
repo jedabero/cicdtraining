@@ -92,7 +92,7 @@ El `Jenkinsfile` contiene stages para:
 - Build de imagen Docker.
 - Autenticación con Google Cloud.
 - Publicación de imagen en Google Artifact Registry.
-- Stage de despliegue futuro.
+- Despliegue en Google Cloud Run.
 
 El `Jenkinsfile` sigue la misma estrategia general del workflow CD de GitHub Actions: construir una imagen Docker y publicarla en Google Artifact Registry usando la región `southamerica-east1`, el repositorio `cicdtrainingrepo` y la imagen `cicdtraining`.
 
@@ -101,7 +101,7 @@ Para ejecutar Jenkins de forma real, se deben configurar estas credenciales en J
 - `gcp-project-id`: credencial tipo texto con el ID del proyecto GCP.
 - `gcp-service-account-key`: credencial tipo archivo con una llave JSON de una cuenta de servicio autorizada para Artifact Registry y Cloud Run.
 
-El stage final queda como despliegue futuro para cumplir el alcance de la guía sin exigir una instancia Jenkins funcional.
+El stage de despliegue está definido en el `Jenkinsfile`, pero su ejecución real depende de contar con una instancia Jenkins configurada con Docker, Google Cloud CLI, acceso a Google Artifact Registry, permisos para Cloud Run y las credenciales requeridas. Según la guía de la actividad, no es indispensable demostrar una ejecución completa de Jenkins; lo evaluado principalmente es la definición clara de los stages.
 
 ## 6. Archivos principales del entregable
 
@@ -175,4 +175,4 @@ La implementación de CI/CD mejora la automatización del ciclo de desarrollo po
 
 El pipeline CI con GitHub Actions permite detectar errores de manera temprana antes de integrar cambios en `main`. El pipeline CD con GitHub Actions automatiza la publicación de imágenes Docker y el despliegue en Google Cloud Run, aumentando la trazabilidad de cada versión entregada.
 
-El `Jenkinsfile` complementa el entregable al documentar una alternativa de pipeline CD con stages claros para dependencias, pruebas, build, Docker build, publicación de imagen y despliegue futuro. En conjunto, estas prácticas reducen errores manuales y fortalecen la calidad del proceso de entrega.
+El `Jenkinsfile` complementa el entregable al documentar una alternativa de pipeline CD con stages claros para dependencias, pruebas, build, Docker build, publicación de imagen y despliegue en Cloud Run. En conjunto, estas prácticas reducen errores manuales y fortalecen la calidad del proceso de entrega.
