@@ -4,6 +4,10 @@
 
 Este repositorio contiene una aplicación web/API desarrollada con [NestJS](https://nestjs.com/), TypeScript, Node.js 24 y pnpm. La aplicación sirve como base para la Actividad 3 de Fundamentos de DevOps, enfocada en la construcción de pipelines CI/CD con GitHub Actions, Jenkins y Docker.
 
+Repositorio en GitHub:
+
+- `https://github.com/jedabero/cicdtraining`
+
 La aplicación expone los siguientes endpoints:
 
 - `/`: endpoint principal que responde `Hello World!`.

@@ -4,6 +4,10 @@ Esta carpeta está destinada a organizar las capturas de pantalla o enlaces de e
 
 No se deben agregar capturas inventadas. Las evidencias deben generarse manualmente después de ejecutar los pipelines y validar el despliegue.
 
+Repositorio asociado:
+
+- `https://github.com/jedabero/cicdtraining`
+
 ## Capturas requeridas
 
 - Repositorio `jedabero/cicdtraining` en GitHub.
@@ -20,9 +24,10 @@ No se deben agregar capturas inventadas. Las evidencias deben generarse manualme
 
 - `01-repositorio-github.png`
 - `02-github-actions-ci.png`
-- `03-github-actions-cd.png`
-- `04-artifact-registry.png`
-- `05-cloud-run-service.png`
-- `06-health-endpoint.png`
-- `07-jenkinsfile.png`
-- `08-jenkins-pipeline.png`
+- `03-github-actions-ci-detalle.png`
+- `04-github-actions-cd.png`
+- `05-artifact-registry.png`
+- `06-cloud-run-service.png`
+- `07-health-endpoint.png`
+- `08-jenkinsfile.png`
+- `09-jenkins-pipeline.png`
