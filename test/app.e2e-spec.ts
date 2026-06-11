@@ -30,6 +30,17 @@ describe('AppController (e2e)', () => {
       .expect({ status: 'ok' });
   });
 
+  it('/version (GET)', () => {
+    return request(app.getHttpServer())
+      .get('/version')
+      .expect(200)
+      .expect({
+        name: 'cicdtraining',
+        version: '0.0.1',
+        environment: process.env.NODE_ENV ?? 'development',
+      });
+  });
+
   afterEach(async () => {
     await app.close();
   });

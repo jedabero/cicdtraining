@@ -14,4 +14,9 @@ export class AppController {
   getHealth(): { status: string } {
     return { status: 'ok' };
   }
+
+  @Get('version')
+  getVersion(): { name: string; version: string; environment: string } {
+    return this.appService.getVersion();
+  }
 }

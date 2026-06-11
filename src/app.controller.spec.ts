@@ -25,4 +25,14 @@ describe('AppController', () => {
       expect(appController.getHealth()).toEqual({ status: 'ok' });
     });
   });
+
+  describe('version', () => {
+    it('should return application version metadata', () => {
+      expect(appController.getVersion()).toEqual({
+        name: 'cicdtraining',
+        version: '0.0.1',
+        environment: process.env.NODE_ENV ?? 'development',
+      });
+    });
+  });
 });
